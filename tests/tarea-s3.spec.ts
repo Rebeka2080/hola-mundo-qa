@@ -50,12 +50,6 @@ test.describe('Pruebas de Login en SauceDemo', () => {
 
 
 
-c: \Users\Usuario\Pictures\TareaS3...JPG
-
-
-c: \Users\Usuario\Pictures\Tarea S3..JPG
-
-
-Los test que automaticé prueban que:
+//Los test que automaticé prueban que:
 1. Se realiza Login exitoso en la pagina con credenciales válidas
 2. Al completar el "campo contraseña" una contraseña inválida no se realiza el login
