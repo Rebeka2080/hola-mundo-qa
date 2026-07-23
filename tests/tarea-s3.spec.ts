@@ -31,7 +31,7 @@ test.describe('Pruebas de Login en SauceDemo', () => {
     await page.locator('[data-test="username"]').fill('standard_user');
 
     // 2. Llenamos el campo de contraseña con un valor INCORRECTO
-    await page.locator('[data-test="password"]').fill('contraseña_incorrecta');
+    await page.locator('[data-test="password"]').fill('Contraseña_incorrecta');
 
     // 3. Hacemos clic en el botón de iniciar sesión
     await page.locator('[data-test="login-button"]').click();
@@ -46,3 +46,16 @@ test.describe('Pruebas de Login en SauceDemo', () => {
   });
 
 });
+
+
+
+
+c: \Users\Usuario\Pictures\TareaS3...JPG
+
+
+c: \Users\Usuario\Pictures\Tarea S3..JPG
+
+
+Los test que automaticé prueban que:
+1. Se realiza Login exitoso en la pagina con credenciales válidas
+2. Al completar el "campo contraseña" una contraseña inválida no se realiza el login

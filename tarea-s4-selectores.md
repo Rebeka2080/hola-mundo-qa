@@ -1,6 +1,7 @@
 # Tarea S4 — Análisis de selectores
 
-## Archivo analizado: `hola-mundo.spec.ts
+Archivo analizado: tarea-s3.spec.ts
+
 | # | Selector | Tipo | Estabilidad (1-5) | Propuesta mejor |
 |---|---|---|---|---|
 | 1 | `[data-test="username"]` | Atributo personalizado | 4 | `page.getByLabel('Username')` (5) |
@@ -19,7 +20,7 @@
 | 2 | Clase CSS (`.btn-primary`, `.title`) — se rompe con cambios de diseño |
 | 1 | Posición (`nth-child`) — se rompe si cambia el orden del DOM |
 
-## 🚩 Selector frágil detectado
+## Selector frágil detectado
 
 `page.locator('.title')` — clase CSS de estilo puro.
 Si el dev renombra la clase o cambia el componente, el test se rompe sin aviso.
