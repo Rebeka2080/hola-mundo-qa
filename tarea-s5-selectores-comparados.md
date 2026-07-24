@@ -1,72 +1,72 @@
 # Tarea S5 — Selectores comparados
 
-Elemento analizado
+Desafío 1: Link "Login" del menú de navegación
 
-```html
-<input id="email" placeholder="ana@ejemplo.com" class="w-full rounded-lg border border-input-border bg-background px-4 py-2.5 text-sm transition-colors placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/20" data-testid="login-email" type="email" value="">
-```
+HTML del elemento:
+html
+  <a class="rounded-lg px-3 py-2 text-sm font-medium transition-colors bg-primary/10 text-primary"
+     data-testid="nav-login"
+     aria-describedby="navhint-login"
+     href="/login">Entrar al laboratorio</a>
 
-Es el input de email del formulario de login.
+*Mi propuesta (Fase 1): 
+page.getByTestId('nav-login')
 
----
+*Lo que propuso Claude (Fase 2):
+page.getByRole('link', { name: 'Entrar al laboratorio' }) — rol semántico + texto visible, exactamente lo que ve el usuario real.
+page.getByTestId('nav-login') — atributo puesto a propósito para testing, estable mientras el dev no lo renombre.
+page.locator('a[href="/login"]') — frágil: la ruta puede cambiar si reorganizan las URLs de la app.
 
-## Paso 1 — Mi propuesta (antes de ver la de la IA)
+*¿Qué propuso Claude que NO se me había ocurrido?: No sabía que de las etiquetas de apertura y cierre (<a>...</a>) se podía extraer un selector de Playwright. Entendí que el tag define el rol (link) y el texto visible entre las etiquetas define el name.
 
-| # | Selector CSS | Equivalente Playwright |
-|---|---|---|
-| 1 | `[placeholder="ana@ejemplo.com"]` | `page.getByPlaceholder('ana@ejemplo.com')` |
-| 2 | `[data-testid="login-email"]` | `page.getByTestId('login-email')` |
-| 3 | `input[type="email"]` | `page.locator('input[type="email"]')` |
+*Mi elección final + por qué (Fase 3):
+ page.getByRole('link', { name: 'Entrar al laboratorio' }) — es el primer selector de la jerarquía de locators que aplica a este elemento, y no depende de atributos que el dev podría cambiar sin avisar.
 
----
 
-## Paso 2 — Propuesta de Claude
+Desafío 2: Caja de "credenciales demo"
 
-| # | Selector Playwright | Justificación |
-|---|---|---|
-| 1 | `page.getByPlaceholder('ana@ejemplo.com')` | Semántico (sigue la prioridad de locators), pero depende de un texto que puede cambiar con i18n o copy. |
-| 2 | `page.getByTestId('login-email')` | Atributo puesto a propósito para testing, no depende de copy ni de estilos. |
-| 3 | `page.locator('input[type="email"]\[data-testid="login-email"\]')` | Funciona, pero es redundante: combina tipo + testid sin necesidad. |
+HTML del elemento:
+html
+  <div class="mb-6 rounded-lg border border-primary/20 bg-primary/5 p-4"
+       data-testid="demo-credentials">
+    <p class="mb-2 text-xs font-bold uppercase tracking-wide text-primary">Cuenta de prueba</p>
+    <div class="space-y-1 text-sm text-muted-foreground">
+      <p>Email: <code>ana.garcia@ejemplo.com</code></p>
+      <p>Password: <code>Segura2026!</code></p>
+    </div>
+    <p class="mt-2 text-xs text-muted-foreground">O regístrate primero y usa la misma contraseña.</p>
+  </div>
 
----
 
-## Paso 3 — Comparación
+*Mi propuesta (Fase 1): 
+page.getByText('Cuenta de prueba')
 
-Coincidimos en 2 de 3: `placeholder` y `data-testid` aparecen en ambas listas, en el mismo orden de prioridad.
+*Lo que propuso Claude (Fase 2):
+page.getByText('Cuenta de prueba') — texto visible estable, primer semántico aplicable según la jerarquía.
+page.getByTestId('demo-credentials') — data-testid puesto a propósito para testing, muy estable.
+page.locator('[data-testid="demo-credentials"]') — funcionalmente idéntico al #2 pero vía CSS, menos expresivo.
 
-La diferencia está en el tercer puesto:
+*Mi elección final + por qué (Fase 3): 
+page.getByText('Cuenta de prueba') — según la jerarquía de locators, getByText va antes que getByTestId, y el texto "Cuenta de prueba" es suficientemente estable como para confiar en él.
 
-- **Yo propuse:** `input[type="email"]`
-- **Claude propuso:** la combinación `type + data-testid`
 
-**Por qué esto importa:** `type="email"` es estable frente a cambios de estilo o de copy (no es una clase ni un texto), pero **no garantiza unicidad**. Si el formulario tuviera, por ejemplo, un campo de "confirmar email", `input[type="email"]` matchearía 2 elementos y el test rompería. Por eso, aunque es un atributo "seguro" en cuanto a que no cambia solo, **no es seguro en cuanto a que agarre 1 solo elemento** — y la consigna pide selectores estables Y únicos.
 
-La propuesta de Claude resuelve ese problema combinando `type` con `data-testid`, pero termina siendo redundante: si ya tenés `data-testid`, no necesitás sumarle el `type`.
+Desafío 3: Mensaje "Has iniciado sesión correctamente."
 
-**Conclusión de la comparación:** mi propuesta #3 era razonable como atributo "no frágil", pero le faltaba el chequeo de unicidad en contexto real de página. Ningún selector de los dos sets usa algo realmente frágil (no hay ids random, ni clases de estilo, ni `nth-child`).
+HTML del elemento:
+html
+  <p class="mb-6 text-muted-foreground">Has iniciado sesión correctamente.</p>
 
----
 
-## Validación de unicidad
+*Mi propuesta (Fase 1): 
+page.getByText('Has iniciado sesión correctamente.')
 
-Antes de decidir, se valida en la Console del navegador (sintaxis CSS, no Playwright):
+*Lo que propuso Claude (Fase 2):
+page.getByText('Has iniciado sesión correctamente.') — primer semántico aplicable, usa texto visible real.
+page.locator('p').filter({ hasText: 'Has iniciado sesión correctamente.' }) — más específico que el anterior, acota la búsqueda al tag <p>.
+page.locator('.text-muted-foreground') — frágil: clase de estilo puro que se rompe si cambia el diseño.
 
-```js
-$$('[data-testid="login-email"]').length   // → 1
-$$('[placeholder="ana@ejemplo.com"]').length   // → 1
-$$('input[type="email"]').length   // → depende de la página, podría dar más de 1
-```
+¿Qué propuso Claude que NO se me había ocurrido?: : Propuso dos localizadores más que yo no habría tenido en cuenta porque pensé que solo había una forma de agarrar ese elemento. page.locator('p').filter({ hasText: 'Has iniciado sesión correctamente.' }) y page.locator('.text-muted-foreground')
 
----
+*Mi elección final + por qué (Fase 3): page.getByText('Has iniciado sesión correctamente.') — coincidí con la propuesta #1 de Claude. Está primero en la jerarquía de los selectores disponibles para este elemento y usa texto visible que refleja exactamente lo que ve el usuario tras el login.
 
-## Decisión final
-
-Elijo **`page.getByTestId('login-email')`**.
-
-Motivo: es el único de los candidatos (los míos + los de Claude) que es estable frente a cambios de estilo, copy e i18n, **y** garantiza unicidad por diseño, ya que el atributo fue puesto a propósito por el equipo de dev para testing.
-
----
-
-## Observación para S5
-
-> Aprendí que "estable" y "único" son dos chequeos distintos: un atributo puede no romperse nunca (como `type="email"`) y aun así no servir como selector si hay más de un elemento con ese mismo atributo en la página. El `data-testid` cubre ambos criterios a la vez, por eso queda primero en la prioridad real de uso.
